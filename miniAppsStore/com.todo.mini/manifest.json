@@ -1,0 +1,10 @@
+{
+    "id": "com.todo.mini",
+    "name": "Todo MiniApp",
+    "icon": "https://assets.socialverseapp.com/todo.png",
+    "version": "1.0.0",
+    "requiredPermissions": [],
+    "optionalPermissions": ["storage"],
+    "description": "A simple todo app for managing tasks with title and description."
+  }
+  
