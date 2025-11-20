@@ -1,47 +1,17 @@
-import React, { useState } from 'react';
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, View, SafeAreaView } from 'react-native';
-import MiniAppList from './src/components/MiniAppList';
-import MiniAppLoader from './src/components/MiniAppLoader';
-import Header from './src/components/Header';
-import { MiniAppManifest } from './src/types/miniApp';
+import { StyleSheet, View, StatusBar } from 'react-native';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+import { MiniAppGrid } from './src/components/MiniAppGrid';
 
 export default function App() {
-  const [selectedMiniApp, setSelectedMiniApp] = useState<MiniAppManifest | null>(null);
-
-  const handleSelectMiniApp = (manifest: MiniAppManifest) => {
-    setSelectedMiniApp(manifest);
-  };
-
-  const handleCloseMiniApp = () => {
-    setSelectedMiniApp(null);
-  };
-
-  const handlePermissionRequest = async (permission: string): Promise<boolean> => {
-    console.log(`Permission requested: ${permission}`);
-    return true;
-  };
-
-  const handleEvent = (eventName: string, data: any) => {
-    console.log(`Event received from mini-app: ${eventName}`, data);
-  };
-
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar style="dark" />
-      {selectedMiniApp ? (
-        <View style={styles.miniAppContainer}>
-          <Header title={selectedMiniApp.name} onBack={handleCloseMiniApp} />
-          <MiniAppLoader
-            manifest={selectedMiniApp}
-            onPermissionRequest={handlePermissionRequest}
-            onEvent={handleEvent}
-          />
+    <SafeAreaProvider>
+      <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
+        <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
+        <View style={styles.content}>
+          <MiniAppGrid />
         </View>
-      ) : (
-        <MiniAppList onSelectMiniApp={handleSelectMiniApp} />
-      )}
-    </SafeAreaView>
+      </SafeAreaView>
+    </SafeAreaProvider>
   );
 }
 
@@ -50,7 +20,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#ffffff',
   },
-  miniAppContainer: {
+  content: {
     flex: 1,
   },
 });
