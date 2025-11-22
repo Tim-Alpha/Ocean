@@ -19,7 +19,7 @@ export const MiniAppItem: React.FC<MiniAppItemProps> = ({ app, onPress }) => {
         <Image
           source={{ uri: app.app_logo_url }}
           style={styles.icon}
-          resizeMode="contain"
+          resizeMode="cover"
         />
       </View>
       <Text style={styles.appName} numberOfLines={2} ellipsizeMode="tail">
@@ -44,18 +44,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 8,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 3,
+    boxShadow: '0px 2px 3px rgba(0, 0, 0, 0.1)',
   },
   icon: {
-    width: '70%',
-    height: '70%',
+    width: '100%',
+    height: '100%',
+    borderRadius: 18,
   },
   appName: {
     fontSize: 12,

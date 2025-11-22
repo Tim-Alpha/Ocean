@@ -1,17 +1,26 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { FlatList, View, StyleSheet, RefreshControl } from 'react-native';
 import { MiniAppItem } from './MiniAppItem';
 import { LoadingFooter } from './LoadingFooter';
 import { EmptyState } from './EmptyState';
+import { MiniAppWebView } from './MiniAppWebView';
 import { useMiniApps } from '../hooks/useMiniApps';
 import { MiniApp } from '../types/miniApp';
 import { GRID_CONFIG } from '../constants/layout';
 
 export const MiniAppGrid: React.FC = () => {
   const { apps, loading, hasMore, error, loadMore, refresh } = useMiniApps();
+  const [selectedApp, setSelectedApp] = useState<MiniApp | null>(null);
+  const [webViewVisible, setWebViewVisible] = useState(false);
 
   const handleAppPress = (app: MiniApp) => {
-    console.log('Pressed app:', app.display_name);
+    setSelectedApp(app);
+    setWebViewVisible(true);
+  };
+
+  const handleCloseWebView = () => {
+    setWebViewVisible(false);
+    setTimeout(() => setSelectedApp(null), 300);
   };
 
   const renderItem = ({ item }: { item: MiniApp }) => (
@@ -49,6 +58,11 @@ export const MiniAppGrid: React.FC = () => {
           />
         }
         showsVerticalScrollIndicator={true}
+      />
+      <MiniAppWebView
+        visible={webViewVisible}
+        app={selectedApp}
+        onClose={handleCloseWebView}
       />
     </View>
   );
