@@ -1,18 +1,21 @@
-import { UserData } from '../types/user';
+import { UserData, UserProfile } from '../types/user';
 
 /**
- * Mock user data - In a real app, this would come from your authentication system
- * or user context/store
+ * Shapes the profile payload that comes from the API into the structure
+ * MiniApps consume inside the WebView via `window.hostUserData`.
  */
-export const getMockUserData = (miniAppId: string): UserData => {
+export const buildUserDataPayload = (
+  profile: UserProfile,
+  miniAppId: string
+): UserData => {
   return {
     mini_app_id: miniAppId,
-    user_id: '12345',
-    username: 'johndoe',
-    email: 'codewithaisha@gmail.com',
-    first_name: 'Sachin',
-    last_name: 'Kinha',
-    profile_image_url: 'https://assets.socialverseapp.com/profile/kinha1731983912image_cropper_1731983900895.jpg.png'
+    user_id: profile.user_id ?? '',
+    username: profile.username ?? '',
+    email: profile.email ?? '',
+    first_name: profile.first_name ?? '',
+    last_name: profile.last_name ?? '',
+    profile_image_url: profile.profile_image_url ?? '',
   };
 };
 

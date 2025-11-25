@@ -8,3 +8,12 @@ export interface UserData {
   profile_image_url: string;
 }
 
+export interface UserProfile {
+  user_id: string;
+  username: string;
+  email: string;
+  first_name: string;
+  last_name: string;
+  profile_image_url: string;
+}
+

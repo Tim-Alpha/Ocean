@@ -1,0 +1,81 @@
+export interface LoginResponse {
+  id: number;
+  status: string;
+  balance: number;
+  token: string;
+  username: string;
+  email: string;
+  first_name: string;
+  last_name: string;
+  isVerified: boolean;
+  role: string;
+  owner_id: string;
+  referral_code: string;
+  wallet_address: string;
+  has_wallet: boolean;
+  last_login: string;
+  profile_picture_url: string;
+}
+
+export interface ProfileResponse {
+  instagram_url: string;
+  tiktok_url: string;
+  youtube_url: string;
+  twitter_url: string;
+  twitter_username: string;
+  twitter_profile_url: string;
+  website: string;
+  is_online: boolean;
+  id: number;
+  first_name: string;
+  last_name: string;
+  name: string;
+  gender: string;
+  balance: number;
+  credit_balance: number;
+  user_type: string;
+  hourly_rate: number;
+  currency: string;
+  owner_id: string;
+  has_evm_wallet: boolean;
+  wallet_address: string;
+  has_solana_wallet: boolean;
+  solana_wallet_address: string;
+  has_wallet: boolean;
+  bio: string;
+  interests: string;
+  resonance_score: number;
+  profile_picture_url: string;
+  character_url: string;
+  original_character_video_url: string;
+  privacy_mode: string;
+  approved_usernames: string;
+  username: string;
+  isVerified: boolean;
+  total_reward_points: number;
+  referral_point: number;
+  referral_count: number;
+  referral_link: string;
+  referral_code: string;
+  total_inspired_user_count: number;
+  daily_login_streak: number;
+  role: string;
+  mobile_number: string;
+  country_code: string;
+  follower_count: number;
+  following_count: number;
+  post_count: number;
+  total_ai_generated_video_count: number;
+  draft_post_count: number;
+  iframe_post_counts: {
+    youtube_post_count: number;
+  };
+  topic_count: number;
+  location: string | null;
+  badges_count: number;
+  user_tags: string;
+  total_subverse_joined_in: number;
+  subverses_member_in: any[];
+  email: string;
+}
+

@@ -12,7 +12,8 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { WebView } from 'react-native-webview';
 import { MiniApp } from '../types/miniApp';
-import { getMockUserData, generateUserDataScript } from '../utils/userData';
+import { useAuth } from '../contexts/AuthContext';
+import { buildUserDataPayload, generateUserDataScript } from '../utils/userData';
 
 interface MiniAppWebViewProps {
   visible: boolean;
@@ -26,6 +27,7 @@ export const MiniAppWebView: React.FC<MiniAppWebViewProps> = ({
   onClose,
 }) => {
   const webViewRef = useRef<WebView>(null);
+  const { user } = useAuth();
 
   if (!app) return null;
 
@@ -38,8 +40,8 @@ export const MiniAppWebView: React.FC<MiniAppWebViewProps> = ({
 
   // Generate user data injection script if login is required
   const getUserDataScript = () => {
-    if (app.is_login_required) {
-      const userData = getMockUserData(app.app_id);
+    if (app.is_login_required && user) {
+      const userData = buildUserDataPayload(user, app.app_id);
       return generateUserDataScript(userData);
     }
     return '';
@@ -47,8 +49,8 @@ export const MiniAppWebView: React.FC<MiniAppWebViewProps> = ({
 
   const handleWebViewLoadEnd = () => {
     // Inject user data after page loads if login is required
-    if (app.is_login_required && webViewRef.current) {
-      const userData = getMockUserData(app.app_id);
+    if (app.is_login_required && user && webViewRef.current) {
+      const userData = buildUserDataPayload(user, app.app_id);
       const script = generateUserDataScript(userData);
       webViewRef.current.injectJavaScript(script);
     }
