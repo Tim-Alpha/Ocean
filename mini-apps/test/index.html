@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Mini App - User Data Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .status {
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .data-section {
+            margin-top: 25px;
+        }
+
+        .data-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px;
+            margin-bottom: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .data-label {
+            font-weight: 600;
+            color: #495057;
+            text-transform: capitalize;
+            flex: 1;
+        }
+
+        .data-value {
+            color: #212529;
+            flex: 2;
+            text-align: right;
+            word-break: break-word;
+        }
+
+        .profile-image {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin: 20px auto;
+            display: block;
+            border: 4px solid #667eea;
+        }
+
+        .loading {
+            text-align: center;
+            color: #666;
+            padding: 20px;
+        }
+
+        .instructions {
+            background: #e7f3ff;
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 8px;
+            font-size: 13px;
+            color: #0c5460;
+        }
+
+        .instructions h3 {
+            margin-bottom: 10px;
+            color: #0c5460;
+        }
+
+        .instructions code {
+            background: #fff;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Test Mini App</h1>
+        <p class="subtitle">Demonstrating how to read user data from Host App</p>
+
+        <div id="status-container">
+            <div class="loading">Loading user data...</div>
+        </div>
+
+        <div id="data-container" style="display: none;">
+            <div class="data-section">
+                <img id="profile-image" class="profile-image" alt="Profile" />
+                <div id="user-data-list"></div>
+            </div>
+        </div>
+
+        <div class="instructions">
+            <h3>📖 How to Use:</h3>
+            <p>This mini app reads user data from <code>window.hostUserData</code> which is injected by the Host App when <code>is_login_required: true</code>.</p>
+            <p><strong>Available variables:</strong></p>
+            <ul style="margin-left: 20px; margin-top: 10px;">
+                <li><code>mini_app_id</code></li>
+                <li><code>user_id</code></li>
+                <li><code>username</code></li>
+                <li><code>email</code></li>
+                <li><code>first_name</code></li>
+                <li><code>last_name</code></li>
+                <li><code>profile_image_url</code></li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // Function to check and display user data
+        function checkUserData() {
+            const statusContainer = document.getElementById('status-container');
+            const dataContainer = document.getElementById('data-container');
+            const userDataList = document.getElementById('user-data-list');
+            const profileImage = document.getElementById('profile-image');
+
+            // Check if user data is available
+            if (typeof window.hostUserData !== 'undefined' && window.hostUserData !== null) {
+                const userData = window.hostUserData;
+
+                // Display success status
+                statusContainer.innerHTML = `
+                    <div class="status success">
+                        ✅ User data successfully loaded from Host App!
+                    </div>
+                `;
+
+                // Display user data
+                const dataFields = [
+                    { key: 'mini_app_id', label: 'Mini App ID' },
+                    { key: 'user_id', label: 'User ID' },
+                    { key: 'username', label: 'Username' },
+                    { key: 'email', label: 'Email' },
+                    { key: 'first_name', label: 'First Name' },
+                    { key: 'last_name', label: 'Last Name' },
+                ];
+
+                let html = '';
+                dataFields.forEach(field => {
+                    html += `
+                        <div class="data-item">
+                            <span class="data-label">${field.label}:</span>
+                            <span class="data-value">${userData[field.key] || 'N/A'}</span>
+                        </div>
+                    `;
+                });
+
+                userDataList.innerHTML = html;
+
+                // Set profile image
+                if (userData.profile_image_url) {
+                    profileImage.src = userData.profile_image_url;
+                    profileImage.style.display = 'block';
+                } else {
+                    profileImage.style.display = 'none';
+                }
+
+                dataContainer.style.display = 'block';
+
+                console.log('User data received:', userData);
+            } else {
+                // Display error status
+                statusContainer.innerHTML = `
+                    <div class="status error">
+                        ❌ User data not available. Make sure:
+                        <ul style="margin-top: 10px; margin-left: 20px;">
+                            <li>The mini app has <code>is_login_required: true</code> in the API</li>
+                            <li>You're accessing this app from the Host App</li>
+                        </ul>
+                    </div>
+                `;
+                dataContainer.style.display = 'none';
+            }
+        }
+
+        // Check immediately when page loads
+        checkUserData();
+
+        // Also listen for the custom event in case data is injected after page load
+        window.addEventListener('hostUserDataReady', function(event) {
+            console.log('User data ready event received:', event.detail);
+            checkUserData();
+        });
+
+        // Fallback: Check periodically for a short time (in case of timing issues)
+        let checkCount = 0;
+        const maxChecks = 10;
+        const checkInterval = setInterval(() => {
+            checkCount++;
+            if (typeof window.hostUserData !== 'undefined' && window.hostUserData !== null) {
+                checkUserData();
+                clearInterval(checkInterval);
+            } else if (checkCount >= maxChecks) {
+                clearInterval(checkInterval);
+                checkUserData(); // Final check
+            }
+        }, 200);
+    </script>
+</body>
+</html>
+

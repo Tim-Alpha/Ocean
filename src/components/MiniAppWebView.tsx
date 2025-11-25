@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import {
   Modal,
   View,
@@ -12,6 +12,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { WebView } from 'react-native-webview';
 import { MiniApp } from '../types/miniApp';
+import { getMockUserData, generateUserDataScript } from '../utils/userData';
 
 interface MiniAppWebViewProps {
   visible: boolean;
@@ -24,6 +25,8 @@ export const MiniAppWebView: React.FC<MiniAppWebViewProps> = ({
   app,
   onClose,
 }) => {
+  const webViewRef = useRef<WebView>(null);
+
   if (!app) return null;
 
   const handleOpenInBrowser = () => {
@@ -32,6 +35,24 @@ export const MiniAppWebView: React.FC<MiniAppWebViewProps> = ({
   };
 
   const isWeb = Platform.OS === 'web';
+
+  // Generate user data injection script if login is required
+  const getUserDataScript = () => {
+    if (app.is_login_required) {
+      const userData = getMockUserData(app.app_id);
+      return generateUserDataScript(userData);
+    }
+    return '';
+  };
+
+  const handleWebViewLoadEnd = () => {
+    // Inject user data after page loads if login is required
+    if (app.is_login_required && webViewRef.current) {
+      const userData = getMockUserData(app.app_id);
+      const script = generateUserDataScript(userData);
+      webViewRef.current.injectJavaScript(script);
+    }
+  };
 
   return (
     <Modal
@@ -64,11 +85,14 @@ export const MiniAppWebView: React.FC<MiniAppWebViewProps> = ({
           </View>
         ) : (
           <WebView
+            ref={webViewRef}
             source={{ uri: app.entry_url }}
             style={styles.webview}
             startInLoadingState={true}
             javaScriptEnabled={true}
             domStorageEnabled={true}
+            injectedJavaScript={getUserDataScript()}
+            onLoadEnd={handleWebViewLoadEnd}
           />
         )}
       </SafeAreaView>
