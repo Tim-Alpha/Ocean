@@ -2,7 +2,9 @@ import { useState, useEffect, useCallback } from 'react';
 import { MiniApp, MiniAppsResponse } from '../types/miniApp';
 import { API_CONFIG } from '../constants/api';
 
-export const useMiniApps = () => {
+export type MiniAppStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | 'LIVE' | 'REQUESTED_FOR_LIVE';
+
+export const useMiniApps = (status: MiniAppStatus = 'PENDING') => {
   const [apps, setApps] = useState<MiniApp[]>([]);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
@@ -17,7 +19,7 @@ export const useMiniApps = () => {
 
     try {
       const response = await fetch(
-        `${API_CONFIG.BASE_URL}/miniapps?page=${pageNum}&page_size=${API_CONFIG.PAGE_SIZE}`
+        `${API_CONFIG.BASE_URL}/miniapps?page=${pageNum}&page_size=${API_CONFIG.PAGE_SIZE}&status=${status}`
       );
       
       if (!response.ok) {
@@ -37,11 +39,14 @@ export const useMiniApps = () => {
     } finally {
       setLoading(false);
     }
-  }, [loading]);
+  }, [loading, status]);
 
   useEffect(() => {
+    setPage(1);
+    setApps([]);
+    setHasMore(true);
     fetchApps(1);
-  }, []);
+  }, [status]);
 
   const loadMore = useCallback(() => {
     if (!loading && hasMore) {
