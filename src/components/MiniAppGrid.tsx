@@ -4,12 +4,14 @@ import { MiniAppItem } from './MiniAppItem';
 import { LoadingFooter } from './LoadingFooter';
 import { EmptyState } from './EmptyState';
 import { MiniAppWebView } from './MiniAppWebView';
-import { useMiniApps } from '../hooks/useMiniApps';
+import { StatusFilter } from './StatusFilter';
+import { useMiniApps, MiniAppStatus } from '../hooks/useMiniApps';
 import { MiniApp } from '../types/miniApp';
 import { GRID_CONFIG } from '../constants/layout';
 
 export const MiniAppGrid: React.FC = () => {
-  const { apps, loading, hasMore, error, loadMore, refresh } = useMiniApps();
+  const [selectedStatus, setSelectedStatus] = useState<MiniAppStatus>('PENDING');
+  const { apps, loading, hasMore, error, loadMore, refresh } = useMiniApps(selectedStatus);
   const [selectedApp, setSelectedApp] = useState<MiniApp | null>(null);
   const [webViewVisible, setWebViewVisible] = useState(false);
 
@@ -21,6 +23,10 @@ export const MiniAppGrid: React.FC = () => {
   const handleCloseWebView = () => {
     setWebViewVisible(false);
     setTimeout(() => setSelectedApp(null), 300);
+  };
+
+  const handleStatusChange = (status: MiniAppStatus) => {
+    setSelectedStatus(status);
   };
 
   const renderItem = ({ item }: { item: MiniApp }) => (
@@ -40,6 +46,10 @@ export const MiniAppGrid: React.FC = () => {
 
   return (
     <View style={styles.container}>
+      <StatusFilter 
+        selectedStatus={selectedStatus} 
+        onStatusChange={handleStatusChange} 
+      />
       <FlatList
         data={apps}
         renderItem={renderItem}
