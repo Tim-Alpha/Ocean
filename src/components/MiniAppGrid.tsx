@@ -4,9 +4,10 @@ import { MiniAppItem } from './MiniAppItem';
 import { LoadingFooter } from './LoadingFooter';
 import { EmptyState } from './EmptyState';
 import { MiniAppWebView } from './MiniAppWebView';
+import { MiniAppVersionsModal } from './MiniAppVersionsModal';
 import { StatusFilter } from './StatusFilter';
 import { useMiniApps, MiniAppStatus } from '../hooks/useMiniApps';
-import { MiniApp } from '../types/miniApp';
+import { MiniApp, MiniAppVersion } from '../types/miniApp';
 import { GRID_CONFIG } from '../constants/layout';
 
 export const MiniAppGrid: React.FC = () => {
@@ -14,10 +15,17 @@ export const MiniAppGrid: React.FC = () => {
   const { apps, loading, hasMore, error, loadMore, refresh } = useMiniApps(selectedStatus);
   const [selectedApp, setSelectedApp] = useState<MiniApp | null>(null);
   const [webViewVisible, setWebViewVisible] = useState(false);
+  const [versionsModalVisible, setVersionsModalVisible] = useState(false);
+  const [appForVersions, setAppForVersions] = useState<MiniApp | null>(null);
 
   const handleAppPress = (app: MiniApp) => {
     setSelectedApp(app);
     setWebViewVisible(true);
+  };
+
+  const handleAppLongPress = (app: MiniApp) => {
+    setAppForVersions(app);
+    setVersionsModalVisible(true);
   };
 
   const handleCloseWebView = () => {
@@ -25,12 +33,34 @@ export const MiniAppGrid: React.FC = () => {
     setTimeout(() => setSelectedApp(null), 300);
   };
 
+  const handleCloseVersionsModal = () => {
+    setVersionsModalVisible(false);
+    setTimeout(() => setAppForVersions(null), 300);
+  };
+
+  const handleVersionSelect = (version: MiniAppVersion) => {
+    if (appForVersions) {
+      // Create a modified app object with the selected version's entry_url
+      const appWithVersion: MiniApp = {
+        ...appForVersions,
+        entry_url: version.entry_url,
+        version: version.version,
+      };
+      setSelectedApp(appWithVersion);
+      setWebViewVisible(true);
+    }
+  };
+
   const handleStatusChange = (status: MiniAppStatus) => {
     setSelectedStatus(status);
   };
 
   const renderItem = ({ item }: { item: MiniApp }) => (
-    <MiniAppItem app={item} onPress={handleAppPress} />
+    <MiniAppItem 
+      app={item} 
+      onPress={handleAppPress}
+      onLongPress={handleAppLongPress}
+    />
   );
 
   const renderFooter = () => {
@@ -73,6 +103,12 @@ export const MiniAppGrid: React.FC = () => {
         visible={webViewVisible}
         app={selectedApp}
         onClose={handleCloseWebView}
+      />
+      <MiniAppVersionsModal
+        visible={versionsModalVisible}
+        app={appForVersions}
+        onClose={handleCloseVersionsModal}
+        onVersionSelect={handleVersionSelect}
       />
     </View>
   );
