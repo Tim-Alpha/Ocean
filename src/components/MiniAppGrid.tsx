@@ -23,7 +23,7 @@ export const MiniAppGrid: React.FC = () => {
     setWebViewVisible(true);
   };
 
-  const handleAppLongPress = (app: MiniApp) => {
+  const handleAppDoublePress = (app: MiniApp) => {
     setAppForVersions(app);
     setVersionsModalVisible(true);
   };
@@ -59,7 +59,7 @@ export const MiniAppGrid: React.FC = () => {
     <MiniAppItem 
       app={item} 
       onPress={handleAppPress}
-      onLongPress={handleAppLongPress}
+      onDoublePress={handleAppDoublePress}
     />
   );
 
