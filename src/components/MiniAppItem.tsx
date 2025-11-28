@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
 import { MiniApp } from '../types/miniApp';
 import { GRID_METRICS, GRID_CONFIG } from '../constants/layout';
@@ -6,13 +6,46 @@ import { GRID_METRICS, GRID_CONFIG } from '../constants/layout';
 interface MiniAppItemProps {
   app: MiniApp;
   onPress?: (app: MiniApp) => void;
+  onDoublePress?: (app: MiniApp) => void;
 }
 
-export const MiniAppItem: React.FC<MiniAppItemProps> = ({ app, onPress }) => {
+export const MiniAppItem: React.FC<MiniAppItemProps> = ({ app, onPress, onDoublePress }) => {
+  const lastTap = useRef<number | null>(null);
+  const singleTapTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const DOUBLE_TAP_DELAY = 300; // milliseconds
+
+  const handlePress = () => {
+    const now = Date.now();
+    
+    if (lastTap.current && (now - lastTap.current) < DOUBLE_TAP_DELAY) {
+      // Double tap detected - cancel single tap timer
+      if (singleTapTimer.current) {
+        clearTimeout(singleTapTimer.current);
+        singleTapTimer.current = null;
+      }
+      if (onDoublePress) {
+        onDoublePress(app);
+      }
+      lastTap.current = null;
+    } else {
+      // First tap - set up single tap timer
+      lastTap.current = now;
+      if (singleTapTimer.current) {
+        clearTimeout(singleTapTimer.current);
+      }
+      singleTapTimer.current = setTimeout(() => {
+        // Single tap - no second tap occurred
+        onPress?.(app);
+        lastTap.current = null;
+        singleTapTimer.current = null;
+      }, DOUBLE_TAP_DELAY);
+    }
+  };
+
   return (
     <TouchableOpacity
       style={styles.container}
-      onPress={() => onPress?.(app)}
+      onPress={handlePress}
       activeOpacity={0.7}
     >
       <View style={styles.iconContainer}>
