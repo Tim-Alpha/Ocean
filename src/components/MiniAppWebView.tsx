@@ -93,6 +93,11 @@ export const MiniAppWebView: React.FC<MiniAppWebViewProps> = ({
             startInLoadingState={true}
             javaScriptEnabled={true}
             domStorageEnabled={true}
+            mediaPlaybackRequiresUserAction={false}
+            allowsInlineMediaPlayback={true}
+            allowsProtectedMedia={true}
+            androidLayerType="hardware"
+            androidHardwareAccelerationDisabled={false}
             injectedJavaScript={getUserDataScript()}
             onLoadEnd={handleWebViewLoadEnd}
           />
