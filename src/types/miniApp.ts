@@ -28,3 +28,20 @@ export interface MiniAppsResponse {
   max_page_size: number;
   data: MiniApp[];
 }
+
+export interface MiniAppVersion {
+  version: string;
+  status: string;
+  rejection_reason: string;
+  entry_url: string;
+  created_at: string;
+}
+
+export interface VersionsResponse {
+  status: string;
+  message: string;
+  page: number;
+  page_size: number;
+  max_page_size: number;
+  data: MiniAppVersion[];
+}
