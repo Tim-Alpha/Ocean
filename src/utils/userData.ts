@@ -1,40 +1,19 @@
-import { UserData, UserProfile } from '../types/user';
-
 /**
- * Shapes the profile payload that comes from the API into the structure
- * MiniApps consume inside the WebView via `window.hostUserData`.
+ * Generates JavaScript code to inject access token into the WebView
+ * This creates a window.hostAccessToken that mini apps can access
  */
-export const buildUserDataPayload = (
-  profile: UserProfile,
-  miniAppId: string
-): UserData => {
-  return {
-    mini_app_id: miniAppId,
-    user_id: profile.user_id ?? '',
-    username: profile.username ?? '',
-    email: profile.email ?? '',
-    first_name: profile.first_name ?? '',
-    last_name: profile.last_name ?? '',
-    profile_image_url: profile.profile_image_url ?? '',
-  };
-};
-
-/**
- * Generates JavaScript code to inject user data into the WebView
- * This creates a window.hostUserData object that mini apps can access
- */
-export const generateUserDataScript = (userData: UserData): string => {
+export const generateAccessTokenScript = (accessToken: string): string => {
   return `
     (function() {
       if (typeof window !== 'undefined') {
-        window.hostUserData = ${JSON.stringify(userData)};
+        window.hostAccessToken = ${JSON.stringify(accessToken)};
         
-        // Dispatch a custom event when user data is available
-        window.dispatchEvent(new CustomEvent('hostUserDataReady', {
-          detail: window.hostUserData
+        // Dispatch a custom event when access token is available
+        window.dispatchEvent(new CustomEvent('hostAccessTokenReady', {
+          detail: window.hostAccessToken
         }));
         
-        console.log('Host user data injected:', window.hostUserData);
+        console.log('Host access token injected');
       }
     })();
     true; // Required for WebView injection

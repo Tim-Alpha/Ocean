@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import {
   Modal,
   View,
@@ -13,7 +13,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { WebView } from 'react-native-webview';
 import { MiniApp } from '../types/miniApp';
 import { useAuth } from '../contexts/AuthContext';
-import { buildUserDataPayload, generateUserDataScript } from '../utils/userData';
+import { generateAccessTokenScript } from '../utils/userData';
+import { trackMiniAppActivity } from '../utils/activityTracking';
 
 interface MiniAppWebViewProps {
   visible: boolean;
@@ -27,31 +28,72 @@ export const MiniAppWebView: React.FC<MiniAppWebViewProps> = ({
   onClose,
 }) => {
   const webViewRef = useRef<WebView>(null);
-  const { user } = useAuth();
+  const { user, authToken } = useAuth();
+  const [accessToken, setAccessToken] = useState<string | null>(null);
+  const [hasTrackedOpen, setHasTrackedOpen] = useState(false);
+
+  // Track OPEN activity when modal becomes visible and user is logged in
+  useEffect(() => {
+    if (visible && app && user && authToken && !hasTrackedOpen) {
+      trackMiniAppActivity(app.app_id, 'OPEN', authToken)
+        .then((response) => {
+          setAccessToken(response.access_token);
+          setHasTrackedOpen(true);
+        })
+        .catch((error) => {
+          console.error('Failed to track OPEN activity:', error);
+        });
+    }
+  }, [visible, app, user, authToken, hasTrackedOpen]);
+
+  // Reset tracking state when modal closes
+  useEffect(() => {
+    if (!visible) {
+      setHasTrackedOpen(false);
+      setAccessToken(null);
+    }
+  }, [visible]);
+
+  // Inject access token when it becomes available (in case page loaded before token was received)
+  useEffect(() => {
+    if (app?.is_login_required && accessToken && webViewRef.current) {
+      const script = generateAccessTokenScript(accessToken);
+      webViewRef.current.injectJavaScript(script);
+    }
+  }, [accessToken, app]);
 
   if (!app) return null;
 
   const handleOpenInBrowser = () => {
+    if (!app) return;
     Linking.openURL(app.entry_url);
+    handleClose();
+  };
+
+  const handleClose = () => {
+    // Track CLOSE activity before closing
+    if (app && user && authToken && hasTrackedOpen) {
+      trackMiniAppActivity(app.app_id, 'CLOSE', authToken).catch((error) => {
+        console.error('Failed to track CLOSE activity:', error);
+      });
+    }
     onClose();
   };
 
   const isWeb = Platform.OS === 'web';
 
-  // Generate user data injection script if login is required
-  const getUserDataScript = () => {
-    if (app.is_login_required && user) {
-      const userData = buildUserDataPayload(user, app.app_id);
-      return generateUserDataScript(userData);
+  // Generate access token injection script if login is required and access token is available
+  const getAccessTokenScript = () => {
+    if (app?.is_login_required && accessToken) {
+      return generateAccessTokenScript(accessToken);
     }
     return '';
   };
 
   const handleWebViewLoadEnd = () => {
-    // Inject user data after page loads if login is required
-    if (app.is_login_required && user && webViewRef.current) {
-      const userData = buildUserDataPayload(user, app.app_id);
-      const script = generateUserDataScript(userData);
+    // Inject access token after page loads if login is required and access token is available
+    if (app?.is_login_required && accessToken && webViewRef.current) {
+      const script = generateAccessTokenScript(accessToken);
       webViewRef.current.injectJavaScript(script);
     }
   };
@@ -61,7 +103,7 @@ export const MiniAppWebView: React.FC<MiniAppWebViewProps> = ({
       visible={visible}
       animationType="slide"
       presentationStyle="fullScreen"
-      onRequestClose={onClose}
+      onRequestClose={handleClose}
     >
       <SafeAreaView style={styles.container}>
         <StatusBar barStyle="dark-content" />
@@ -69,7 +111,7 @@ export const MiniAppWebView: React.FC<MiniAppWebViewProps> = ({
           <Text style={styles.title} numberOfLines={1}>
             {app.display_name}
           </Text>
-          <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+          <TouchableOpacity onPress={handleClose} style={styles.closeButton}>
             <Text style={styles.closeText}>✕</Text>
           </TouchableOpacity>
         </View>
@@ -97,8 +139,7 @@ export const MiniAppWebView: React.FC<MiniAppWebViewProps> = ({
             allowsInlineMediaPlayback={true}
             allowsProtectedMedia={true}
             androidLayerType="hardware"
-            androidHardwareAccelerationDisabled={false}
-            injectedJavaScript={getUserDataScript()}
+            injectedJavaScript={getAccessTokenScript()}
             onLoadEnd={handleWebViewLoadEnd}
           />
         )}
