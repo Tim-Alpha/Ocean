@@ -6,3 +6,4 @@ export { AnimatedLoader } from './AnimatedLoader';
 export { MiniAppWebView } from './MiniAppWebView';
 export { LoginScreen } from './LoginScreen';
 export { UserHeader } from './UserHeader';
+export { HostUserDataModal } from './HostUserDataModal';
