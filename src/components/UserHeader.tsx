@@ -1,12 +1,17 @@
-import React from 'react';
-import { Image, StyleSheet, Text, View } from 'react-native';
+import React, { useState } from 'react';
+import { Image, StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import { UserProfile } from '../types/user';
+import { useAuth } from '../contexts/AuthContext';
+import { HostUserDataModal } from './HostUserDataModal';
 
 interface UserHeaderProps {
   profile: UserProfile;
 }
 
 export const UserHeader: React.FC<UserHeaderProps> = ({ profile }) => {
+  const { logout } = useAuth();
+  const [showDataModal, setShowDataModal] = useState(false);
+  
   const fullName = [profile.first_name, profile.last_name]
     .filter(Boolean)
     .join(' ')
@@ -36,6 +41,21 @@ export const UserHeader: React.FC<UserHeaderProps> = ({ profile }) => {
           {profile.email || profile.username}
         </Text>
       </View>
+      <View style={styles.actions}>
+        <TouchableOpacity
+          onPress={() => setShowDataModal(true)}
+          style={styles.infoButton}
+        >
+          <Text style={styles.infoText}>ℹ️</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={logout} style={styles.logoutButton}>
+          <Text style={styles.logoutText}>Logout</Text>
+        </TouchableOpacity>
+      </View>
+      <HostUserDataModal
+        visible={showDataModal}
+        onClose={() => setShowDataModal(false)}
+      />
     </View>
   );
 };
@@ -82,6 +102,33 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#6b7280',
     marginTop: 2,
+  },
+  actions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  infoButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: '#e0e7ff',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  infoText: {
+    fontSize: 18,
+  },
+  logoutButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 8,
+    backgroundColor: '#ef4444',
+    marginLeft: 8,
+  },
+  logoutText: {
+    color: '#ffffff',
+    fontSize: 14,
+    fontWeight: '600',
   },
 });
 
