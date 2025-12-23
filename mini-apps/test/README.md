@@ -20,6 +20,8 @@ sequenceDiagram
 `window.hostUserData` contains:
 
 - `mini_app_id`
+- `access_token`
+- `place_id`
 - `user_id`
 - `username`
 - `email`
