@@ -21,12 +21,14 @@ const STORAGE_KEYS = {
 interface AuthContextValue {
   user: UserProfile | null;
   authToken: string | null;
+  placeId: string | null;
   loading: boolean;
   error: string | null;
   initializing: boolean;
   login: (mixed: string, password: string) => Promise<void>;
   logout: () => void;
   refreshProfile: () => Promise<void>;
+  setPlaceId: (placeId: string | null) => void;
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -107,6 +109,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const [user, setUser] = useState<UserProfile | null>(null);
   const [authToken, setAuthToken] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
+  const [placeId, setPlaceId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [initializing, setInitializing] = useState(true);
@@ -302,6 +305,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     setUser(null);
     setAuthToken(null);
     setUserId(null);
+    setPlaceId(null);
     setError(null);
     clearSession();
   }, [clearSession]);
@@ -310,14 +314,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     () => ({
       user,
       authToken,
+      placeId,
       loading,
       error,
       initializing,
       login,
       logout,
       refreshProfile,
+      setPlaceId,
     }),
-    [user, authToken, loading, error, initializing, login, logout, refreshProfile]
+    [
+      user,
+      authToken,
+      placeId,
+      loading,
+      error,
+      initializing,
+      login,
+      logout,
+      refreshProfile,
+    ]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
