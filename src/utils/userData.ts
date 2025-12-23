@@ -20,3 +20,42 @@ export const generateAccessTokenScript = (accessToken: string): string => {
   `;
 };
 
+export interface HostUserDataPayload {
+  mini_app_id: string;
+  user_id: string;
+  username: string;
+  email: string;
+  first_name: string;
+  last_name: string;
+  profile_image_url: string;
+  access_token: string | null;
+  place_id: string | null;
+}
+
+/**
+ * Generates JavaScript code to inject user identity data into the WebView.
+ * This creates a window.hostUserData object that mini apps can access.
+ */
+export const generateHostUserDataScript = (
+  payload: HostUserDataPayload
+): string => {
+  const serialized = JSON.stringify(payload);
+
+  return `
+    (function() {
+      if (typeof window !== 'undefined') {
+        window.hostUserData = ${serialized};
+
+        // Dispatch a custom event when user data is available
+        window.dispatchEvent(new CustomEvent('hostUserDataReady', {
+          detail: window.hostUserData
+        }));
+
+        console.log('Host user data injected');
+      }
+    })();
+    true; // Required for WebView injection
+  `;
+};
+
+
