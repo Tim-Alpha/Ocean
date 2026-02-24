@@ -62,12 +62,12 @@ export const MiniAppWebView: React.FC<MiniAppWebViewProps> = ({
 
   // Helper function to generate user data script - defined before hooks that use it
   const getUserDataScript = React.useCallback(() => {
-    if (!app?.is_login_required || !user || !authToken) {
+    if (!user || !authToken) {
       return '';
     }
 
     return generateHostUserDataScript({
-      mini_app_id: app.app_id,
+      mini_app_id: app?.app_id || 'N/A',
       user_id: user.user_id,
       username: user.username,
       email: user.email,
@@ -78,25 +78,25 @@ export const MiniAppWebView: React.FC<MiniAppWebViewProps> = ({
       access_token: authToken,
       place_id: placeId ?? null,
     });
-  }, [app?.is_login_required, app?.app_id, user, authToken, placeId]);
+  }, [app?.app_id, user, authToken, placeId]);
 
   // Inject access token when it becomes available (in case page loaded before token was received)
   useEffect(() => {
-    if (app?.is_login_required && accessToken && webViewRef.current) {
+    if (accessToken && webViewRef.current) {
       const script = generateAccessTokenScript(accessToken);
       webViewRef.current.injectJavaScript(script);
     }
-  }, [accessToken, app]);
+  }, [accessToken]);
 
   // Re-inject user data whenever it changes (e.g. place_id set after initial load)
   useEffect(() => {
-    if (app?.is_login_required && webViewRef.current && user && authToken) {
+    if (webViewRef.current && user && authToken) {
       const script = getUserDataScript();
       if (script) {
         webViewRef.current.injectJavaScript(script);
       }
     }
-  }, [app?.is_login_required, user, authToken, getUserDataScript]);
+  }, [user, authToken, getUserDataScript]);
 
   // Early return after all hooks - this is safe as long as all hooks are called before
   if (!app) return null;
@@ -121,7 +121,7 @@ export const MiniAppWebView: React.FC<MiniAppWebViewProps> = ({
 
   // Generate access token injection script if login is required and access token is available
   const getAccessTokenScript = () => {
-    if (app?.is_login_required && accessToken) {
+    if (accessToken) {
       return generateAccessTokenScript(accessToken);
     }
     return '';
@@ -133,8 +133,8 @@ export const MiniAppWebView: React.FC<MiniAppWebViewProps> = ({
   };
 
   const handleWebViewLoadEnd = () => {
-    // Inject access token after page loads if login is required and access token is available
-    if (app?.is_login_required && webViewRef.current) {
+    // Inject access token after page loads
+    if (webViewRef.current) {
       const script = getInjectedScript();
       if (script) {
         webViewRef.current.injectJavaScript(script);
